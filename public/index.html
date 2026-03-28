@@ -65,6 +65,17 @@ body{background:var(--parchment);display:flex;justify-content:center;align-items
 .btn-journal{background:transparent;border:1px solid var(--soil);color:var(--soil);padding:11px 20px;font-family:var(--fb);font-size:13px;cursor:pointer;border-radius:2px;transition:background .3s;}
 .btn-journal:hover{background:var(--parchment);}
 .btn-again{background:none;border:none;color:var(--mist);font-family:var(--fb);font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:11px 0;}
+.season-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.season-btn{background:var(--parchment);border:1px solid var(--parchment-deep);padding:14px 10px;cursor:pointer;border-radius:4px;font-family:var(--fb);transition:border-color .25s,background .25s;text-align:center;}
+.season-btn:hover{border-color:var(--mist);background:var(--cream);}
+.season-btn .s-icon{font-size:22px;display:block;margin-bottom:6px;line-height:1;}
+.season-btn .s-name{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mist);display:block;margin-bottom:3px;}
+.season-btn .s-place{font-family:var(--fd);font-size:15px;color:var(--text-g);font-style:italic;display:block;}
+.action-panel{background:var(--parchment);border-radius:4px;padding:20px 18px;margin-bottom:16px;animation:fi 0.5s ease;}
+.action-season{font-size:11px;letter-spacing:.12em;text-transform:uppercase;color:var(--mist);margin-bottom:12px;display:flex;align-items:center;gap:7px;}
+.action-text{font-family:var(--fd);font-size:20px;font-weight:400;line-height:1.75;color:var(--text);font-style:italic;}
+.action-loading{font-family:var(--fd);font-size:17px;font-weight:300;color:var(--mist);font-style:italic;text-align:center;padding:16px 0;}
+.btn-action-back{background:none;border:none;color:var(--mist);font-family:var(--fb);font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:4px 0;display:block;margin-bottom:20px;}
 
 /* JOURNAL */
 .j-date{font-family:var(--fd);font-size:20px;font-weight:400;color:var(--text-g);margin-bottom:16px;margin-top:4px;}
@@ -172,8 +183,35 @@ body{background:var(--parchment);display:flex;justify-content:center;align-items
     <div class="r-div"></div>
     <p id="r-refl" class="refl"></p>
     <div id="r-pblock" class="j-q" style="display:none"><span id="r-p"></span></div>
-    <div class="r-actions">
-      <button class="btn-journal" onclick="go('journal')">Write in journal</button>
+    <div id="action-panel" style="display:none;">
+      <p class="action-season" id="action-season"></p>
+      <p class="action-text" id="action-text"></p>
+    </div>
+    <div id="season-btns-wrap">
+      <div class="season-btns">
+        <button class="season-btn" onclick="getAction('garden','&#127807;','Spring · The Garden')">
+          <span class="s-icon">&#127807;</span>
+          <span class="s-name">Spring</span>
+          <span class="s-place">The Garden</span>
+        </button>
+        <button class="season-btn" onclick="getAction('cloister','&#9728;','Summer · The Cloister')">
+          <span class="s-icon">&#9728;</span>
+          <span class="s-name">Summer</span>
+          <span class="s-place">The Cloister</span>
+        </button>
+        <button class="season-btn" onclick="getAction('library','&#128220;','Autumn · The Library')">
+          <span class="s-icon">&#128220;</span>
+          <span class="s-name">Autumn</span>
+          <span class="s-place">The Library</span>
+        </button>
+        <button class="season-btn" onclick="getAction('cell','&#128337;','Winter · The Cell')">
+          <span class="s-icon">&#128337;</span>
+          <span class="s-name">Winter</span>
+          <span class="s-place">The Cell</span>
+        </button>
+      </div>
+    </div>
+    <div style="text-align:center;margin-top:8px;">
       <button class="btn-again" onclick="go('ask')">Ask again</button>
     </div>
   </div>
@@ -184,6 +222,7 @@ body{background:var(--parchment);display:flex;justify-content:center;align-items
   <button class="btn-back" onclick="go('receive')">←</button>
   <div class="pad">
     <p class="j-date" id="j-date"></p>
+    <p id="j-season" style="font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--mist);margin-bottom:18px;margin-top:-10px;"></p>
     <div class="j-echo" id="j-echo"></div>
     <textarea id="j-in" class="j-ta" placeholder="Nothing you write here is seen or judged." oninput="onJType()" rows="9"></textarea>
     <p class="save-st" id="j-st"></p>
@@ -196,19 +235,91 @@ body{background:var(--parchment);display:flex;justify-content:center;align-items
 
 </div>
 <script>
-let mood = null, last = null, saveTimer = null, watchdog = null;
+let mood = null, last = null, saveTimer = null, watchdog = null, season = null;
+
+const SEASONS = {
+  garden:  { icon: '&#127807;', label: 'Spring · The Garden',   prompt: 'What is growing in you right now, even slowly, even unseen? What would it mean to tend it today rather than rush it?' },
+  cloister:{ icon: '&#9728;',   label: 'Summer · The Cloister', prompt: 'Where today were you among others and yet quietly alone? What did that threshold feel like — between the world outside and the stillness within?' },
+  library: { icon: '&#128220;', label: 'Autumn · The Library',  prompt: 'What understanding have you gathered this season that you did not have before? What have the words you have read, heard, or carried been teaching you?' },
+  cell:    { icon: '&#128337;', label: 'Winter · The Cell',     prompt: 'When everything unnecessary falls away, what remains? What is true about you in the silence, before any word or action?' }
+};
 
 function go(id) {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   document.getElementById('s-' + id).classList.add('active');
   document.getElementById('err').textContent = '';
   clearTimeout(watchdog);
+  if (id === 'receive') {
+    // Reset action panel when returning to receive screen
+    const panel = document.getElementById('action-panel');
+    const wrap = document.getElementById('season-btns-wrap');
+    if (panel) panel.style.display = 'none';
+    if (wrap) wrap.style.display = 'block';
+    const again = document.getElementById('action-again');
+    if (again) again.style.display = 'none';
+  }
   if (id === 'loading') {
     document.getElementById('load-w').style.display = 'block';
     document.getElementById('load-err-block').style.display = 'none';
     watchdog = setTimeout(() => showLoadError('The request timed out. Please try again.'), 20000);
   }
   if (id === 'journal') initJournal();
+}
+
+async function getAction(s, icon, label) {
+  const panel = document.getElementById('action-panel');
+  const wrap = document.getElementById('season-btns-wrap');
+  const textEl = document.getElementById('action-text');
+  const seasonEl = document.getElementById('action-season');
+
+  // Show loading state
+  seasonEl.innerHTML = icon + '&ensp;' + label;
+  textEl.textContent = '';
+  textEl.className = 'action-loading';
+  textEl.textContent = 'A moment…';
+  panel.style.display = 'block';
+  wrap.style.display = 'none';
+
+  try {
+    const res = await fetch('/action', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        season: s,
+        verse_ref: last ? last.verse_ref : '',
+        verse_text: last ? last.verse_text : ''
+      })
+    });
+    const data = await res.json();
+    textEl.className = 'action-text';
+    textEl.textContent = data.action || 'Something quiet. Something yours.';
+  } catch(e) {
+    textEl.className = 'action-text';
+    textEl.textContent = 'Something quiet. Something yours.';
+  }
+
+  // Add a "try another" link below
+  const existing = document.getElementById('action-again');
+  if (!existing) {
+    const again = document.createElement('button');
+    again.id = 'action-again';
+    again.className = 'btn-action-back';
+    again.textContent = '← Choose another';
+    again.style.marginTop = '16px';
+    again.onclick = () => {
+      panel.style.display = 'none';
+      wrap.style.display = 'block';
+      again.remove();
+    };
+    panel.parentNode.insertBefore(again, panel.nextSibling);
+  } else {
+    existing.style.display = 'block';
+    existing.onclick = () => {
+      panel.style.display = 'none';
+      wrap.style.display = 'block';
+      existing.style.display = 'none';
+    };
+  }
 }
 
 function showLoadError(msg) {
@@ -277,9 +388,18 @@ async function receive() {
 function initJournal() {
   const now = new Date();
   document.getElementById('j-date').textContent = now.toLocaleDateString('en-GB', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  const seasonEl = document.getElementById('j-season');
   const echo = document.getElementById('j-echo');
-  if (last && last.journal_prompt) { echo.textContent = last.journal_prompt; echo.style.display = 'block'; }
-  else echo.style.display = 'none';
+  if (season && SEASONS[season]) {
+    const s = SEASONS[season];
+    seasonEl.innerHTML = s.icon + '&ensp;' + s.label;
+    echo.textContent = s.prompt;
+    echo.style.display = 'block';
+  } else {
+    seasonEl.textContent = '';
+    if (last && last.journal_prompt) { echo.textContent = last.journal_prompt; echo.style.display = 'block'; }
+    else echo.style.display = 'none';
+  }
   const key = 'mg-' + now.toISOString().split('T')[0];
   try { document.getElementById('j-in').value = localStorage.getItem(key) || ''; } catch(e) {}
   loadPast(key);

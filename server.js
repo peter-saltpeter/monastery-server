@@ -47,6 +47,43 @@ app.post("/receive", async (req, res) => {
   }
 });
 
+const ACTION_SYS = `You are the quiet voice of Monastery Garden. Given a Bible verse the person has just received and a monastic season, suggest one simple, concrete action they can do in the next hour. The action must:
+- Always be physically possible regardless of where the person is
+- Embody the spirit of the season without requiring explanation
+- Be specific enough to actually do, but open enough to interpret
+- Be 2–3 sentences. No preamble. Just the action.
+
+Seasons and their spirit:
+- garden: outward, hands in soil, attending to what is growing, creation
+- cloister: the threshold between world and enclosure, warmth, communal but contemplative, walking
+- library: inward to tradition and text, harvesting understanding, reading, writing
+- cell: deepest inward, bare solitude, silence, stillness, nothing unnecessary
+
+Respond ONLY in this exact JSON with no extra text:
+{"action":"..."}`;
+
+app.post("/action", async (req, res) => {
+  try {
+    const { season, verse_ref, verse_text } = req.body;
+    if (!season) return res.status(400).json({ error: "No season provided" });
+    const msg = `Season: ${season}
+Verse: ${verse_ref} — ${verse_text}`;
+    const response = await client.messages.create({
+      model: "claude-sonnet-4-6",
+      max_tokens: 300,
+      system: ACTION_SYS,
+      messages: [{ role: "user", content: msg }],
+    });
+    const raw = (response.content.find(b => b.type === "text") || {}).text || "";
+    const clean = raw.replace(/^```json\s*/, "").replace(/\s*```$/, "").trim();
+    const parsed = JSON.parse(clean);
+    res.json(parsed);
+  } catch (e) {
+    console.error(e);
+    res.status(500).json({ error: e.message });
+  }
+});
+
 app.get("/health", (req, res) => res.json({ ok: true }));
 
 const PORT = process.env.PORT || 3000;
