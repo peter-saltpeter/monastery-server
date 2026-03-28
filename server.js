@@ -1,9 +1,21 @@
 import express from "express";
-import cors from "cors";
 import Anthropic from "@anthropic-ai/sdk";
 
 const app = express();
-app.use(cors());
+app.use(express.json());
+
+// Explicit CORS — allow all origins
+app.use((req, res, next) => {
+  res.header("Access-Control-Allow-Origin", "*");
+  res.header("Access-Control-Allow-Methods", "GET, POST, OPTIONS");
+  res.header("Access-Control-Allow-Headers", "Content-Type");
+  if (req.method === "OPTIONS") return res.sendStatus(200);
+  next();
+});
+
+const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+const app = express();
 app.use(express.json());
 
 const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });

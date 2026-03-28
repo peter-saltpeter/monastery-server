@@ -7,7 +7,6 @@
   },
   "dependencies": {
     "@anthropic-ai/sdk": "latest",
-    "cors": "latest",
     "express": "latest"
   }
 }
