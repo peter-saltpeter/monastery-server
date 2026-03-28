@@ -1,11 +1,12 @@
 import express from "express";
 import Anthropic from "@anthropic-ai/sdk";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+
+const __dirname = dirname(fileURLToPath(import.meta.url));
 
 const app = express();
 app.use(express.json());
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
-const __dirname = dirname(fileURLToPath(import.meta.url));
 app.use(express.static(join(__dirname, "public")));
 
 app.use((req, res, next) => {
@@ -22,7 +23,7 @@ const SYS = `You are the quiet voice of Monastery Garden — a contemplative spa
 
 Rules:
 - Choose a real canonical Bible verse that genuinely addresses what the person shared.
-- Reflection: 3–5 sentences, warm, unhurried, non-prescriptive. Name what they may feel without projecting. No advice. Offer companionship.
+- Reflection: 3-5 sentences, warm, unhurried, non-prescriptive. Name what they may feel without projecting. No advice. Offer companionship.
 - Journal prompt: one quiet question to help them go deeper. Always include it.
 - No therapy language. Never be cheerful. Be present. Tone: a wise slow-speaking friend.
 
