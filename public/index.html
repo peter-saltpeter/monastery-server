@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monastery Garden</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;1,300;1,400&family=Lora:ital,wght@0,400;0,500;1,400&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --cream:#F5F0E8;--parchment:#EDE5D0;--parchment-deep:#E3D8C0;
+  --soil:#6B4F3A;--moss:#4A6741;--moss-light:#5C7E52;
+  --mist:#9BA89A;--mist-light:#B8C4B5;--text:#2C2416;--text-g:#7A6A56;
+  --fd:'Cormorant Garamond',Georgia,serif;--fb:'Lora',Georgia,serif;
+}
+body{background:var(--parchment);display:flex;justify-content:center;align-items:flex-start;min-height:100vh;font-family:var(--fb);color:var(--text);padding:20px 12px 40px;}
+.app{width:100%;max-width:420px;background:var(--cream);border-radius:20px;overflow:hidden;box-shadow:0 16px 48px rgba(44,36,22,0.15);}
+.screen{display:none;flex-direction:column;animation:fi 0.6s ease;}
+.screen.active{display:flex;}
+@keyframes fi{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:translateY(0)}}
+@keyframes breathe{0%,100%{transform:scale(1);opacity:.5}50%{transform:scale(1.2);opacity:1}}
+.btn-back{background:none;border:none;color:var(--mist);cursor:pointer;font-size:20px;padding:18px 20px 0;display:block;font-family:var(--fb);transition:color .3s;}
+.btn-back:hover{color:var(--text-g);}
+.pad{padding:0 28px 40px;}
+
+/* ENTRY */
+#s-entry{align-items:center;padding:36px 28px 44px;text-align:center;}
+.app-name{font-family:var(--fd);font-size:34px;font-weight:400;color:var(--soil);letter-spacing:.04em;margin-bottom:8px;}
+.tagline{font-size:14px;color:var(--text-g);font-style:italic;margin-bottom:40px;line-height:1.6;}
+.btn-enter{background:var(--soil);color:var(--cream);border:none;padding:14px 36px;font-family:var(--fb);font-size:15px;letter-spacing:.08em;cursor:pointer;border-radius:2px;transition:background .3s;}
+.btn-enter:hover{background:var(--text);}
+
+/* ASK */
+.ask-h{font-family:var(--fd);font-size:27px;font-weight:400;line-height:1.3;color:var(--text);margin-bottom:6px;margin-top:4px;}
+.ask-sub{font-size:13px;color:var(--text-g);font-style:italic;margin-bottom:24px;}
+.ask-ta{width:100%;min-height:110px;background:var(--parchment);border:none;border-bottom:1.5px solid var(--mist-light);padding:14px;font-family:var(--fb);font-size:15px;color:var(--text);resize:none;outline:none;line-height:1.7;border-radius:4px 4px 0 0;transition:border-color .3s;}
+.ask-ta:focus{border-bottom-color:var(--soil);}
+.ask-ta::placeholder{color:var(--mist);font-style:italic;}
+.or-div{display:flex;align-items:center;gap:10px;margin:20px 0 14px;}
+.or-div::before,.or-div::after{content:'';flex:1;height:1px;background:var(--parchment-deep);}
+.or-div span{font-size:11px;letter-spacing:.1em;text-transform:uppercase;color:var(--mist);}
+.pills{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:6px;}
+.pill{background:transparent;border:1px solid var(--mist-light);color:var(--text-g);padding:8px 16px;font-family:var(--fb);font-size:13px;cursor:pointer;border-radius:100px;transition:all .25s;}
+.pill:hover{border-color:var(--soil);color:var(--soil);}
+.pill.sel{background:var(--parchment);border-color:var(--moss);color:var(--moss);}
+.btn-receive{width:100%;background:var(--moss);color:var(--cream);border:none;padding:15px;font-family:var(--fb);font-size:15px;letter-spacing:.06em;cursor:pointer;margin-top:24px;border-radius:2px;transition:background .3s,opacity .3s;}
+.btn-receive:hover:not(:disabled){background:var(--soil);}
+.btn-receive:disabled{opacity:.35;cursor:not-allowed;}
+.err{font-size:12px;color:#a0522d;font-style:italic;margin-top:8px;min-height:16px;}
+
+/* LOADING */
+#s-loading{align-items:center;justify-content:center;min-height:300px;gap:24px;padding:0 32px;text-align:center;}
+.bloom{width:56px;height:56px;animation:breathe 2.4s ease-in-out infinite;}
+.load-w{font-family:var(--fd);font-size:19px;font-weight:300;color:var(--text-g);font-style:italic;}
+.load-err{font-size:13px;color:#a0522d;font-style:italic;line-height:1.7;margin-bottom:16px;}
+.btn-back-load{background:none;border:none;color:var(--mist);font-family:var(--fb);font-size:14px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;}
+
+/* RECEIVE */
+.v-ref{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--moss);margin-bottom:14px;margin-top:4px;}
+.v-text{font-family:var(--fd);font-size:24px;font-weight:400;line-height:1.6;color:var(--text);font-style:italic;margin-bottom:28px;}
+.r-div{width:40px;height:1px;background:var(--mist-light);margin-bottom:24px;}
+.refl{font-size:15px;line-height:1.9;color:var(--text-g);margin-bottom:24px;}
+.j-q{border-left:2px solid var(--moss-light);padding:12px 16px;background:var(--parchment);font-size:14px;font-style:italic;color:var(--text-g);line-height:1.75;margin-bottom:28px;border-radius:0 4px 4px 0;}
+.r-actions{display:flex;align-items:center;gap:16px;}
+.btn-journal{background:transparent;border:1px solid var(--soil);color:var(--soil);padding:11px 20px;font-family:var(--fb);font-size:13px;cursor:pointer;border-radius:2px;transition:background .3s;}
+.btn-journal:hover{background:var(--parchment);}
+.btn-again{background:none;border:none;color:var(--mist);font-family:var(--fb);font-size:13px;cursor:pointer;text-decoration:underline;text-underline-offset:3px;padding:11px 0;}
+
+/* JOURNAL */
+.j-date{font-family:var(--fd);font-size:20px;font-weight:400;color:var(--text-g);margin-bottom:16px;margin-top:4px;}
+.j-echo{background:var(--parchment);border-left:2px solid var(--moss-light);padding:10px 14px;font-size:13px;font-style:italic;color:var(--text-g);line-height:1.7;margin-bottom:18px;border-radius:0 4px 4px 0;display:none;}
+.j-ta{width:100%;min-height:180px;background:transparent;border:none;border-bottom:1px solid var(--parchment-deep);padding:0 0 12px;font-family:var(--fb);font-size:15px;color:var(--text);resize:none;outline:none;line-height:1.85;}
+.j-ta::placeholder{color:var(--mist-light);font-style:italic;}
+.save-st{font-size:11px;color:var(--mist);font-style:italic;margin-top:8px;min-height:14px;transition:opacity .5s;}
+.past-lbl{font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--mist);margin-bottom:12px;margin-top:32px;}
+.pe{border-bottom:1px solid var(--parchment-deep);padding:12px 0;}
+.pe:last-child{border-bottom:none;}
+.pe-d{font-size:11px;color:var(--text-g);margin-bottom:4px;}
+.pe-p{font-size:13px;color:var(--mist);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- ENTRY -->
+<div id="s-entry" class="screen active">
+  <svg viewBox="0 0 300 180" fill="none" style="width:100%;max-width:300px;height:170px;margin:36px auto 28px;">
+    <rect width="300" height="180" fill="#F5F0E8"/>
+    <ellipse cx="75" cy="155" rx="100" ry="35" fill="#EDE5D0"/>
+    <ellipse cx="225" cy="158" rx="110" ry="33" fill="#EDE5D0"/>
+    <rect y="158" width="300" height="22" fill="#E3D8C0"/>
+    <path d="M127 180 Q130 150 133 135 Q138 118 150 114 Q162 118 167 135 Q170 150 173 180Z" fill="#DDD0B8"/>
+    <ellipse cx="150" cy="172" rx="9" ry="4" fill="#C8BCA8" opacity=".7"/>
+    <ellipse cx="150" cy="157" rx="7" ry="3.5" fill="#C8BCA8" opacity=".55"/>
+    <rect x="42" y="80" width="8" height="90" rx="3" fill="#6B4F3A"/>
+    <ellipse cx="46" cy="93" rx="32" ry="25" fill="#3D5736"/>
+    <ellipse cx="40" cy="75" rx="24" ry="20" fill="#4A6741"/>
+    <ellipse cx="53" cy="70" rx="20" ry="17" fill="#5A7A50"/>
+    <ellipse cx="46" cy="58" rx="16" ry="14" fill="#6B8C60"/>
+    <rect x="250" y="80" width="8" height="90" rx="3" fill="#6B4F3A"/>
+    <ellipse cx="254" cy="93" rx="32" ry="25" fill="#3D5736"/>
+    <ellipse cx="260" cy="75" rx="24" ry="20" fill="#4A6741"/>
+    <ellipse cx="247" cy="70" rx="20" ry="17" fill="#5A7A50"/>
+    <ellipse cx="254" cy="58" rx="16" ry="14" fill="#6B8C60"/>
+    <ellipse cx="88" cy="155" rx="26" ry="15" fill="#4A6741"/>
+    <ellipse cx="76" cy="161" rx="18" ry="10" fill="#5A7A50"/>
+    <ellipse cx="212" cy="155" rx="26" ry="15" fill="#4A6741"/>
+    <ellipse cx="224" cy="161" rx="18" ry="10" fill="#5A7A50"/>
+    <path d="M129 148 L129 127 Q129 114 147 112 Q165 114 171 127 L171 148" fill="none" stroke="#B4A090" stroke-width="1.8"/>
+    <path d="M129 127 Q129 108 150 106 Q171 108 171 127" fill="none" stroke="#B4A090" stroke-width="1.8"/>
+    <circle cx="150" cy="22" r="18" fill="#EDE5D0" opacity=".6"/>
+    <circle cx="150" cy="22" r="11" fill="#E8D8B8" opacity=".7"/>
+    <circle cx="150" cy="22" r="5" fill="#DCC89A" opacity=".5"/>
+    <path d="M68 32 Q72 27 77 32" stroke="#B4A890" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+    <path d="M205 44 Q208 40 213 44" stroke="#B4A890" stroke-width="1.3" fill="none" stroke-linecap="round"/>
+  </svg>
+  <h1 class="app-name">Monastery Garden</h1>
+  <p class="tagline">A quiet place to bring what you're carrying.</p>
+  <button class="btn-enter" onclick="go('ask')">Enter the garden</button>
+</div>
+
+<!-- ASK -->
+<div id="s-ask" class="screen">
+  <button class="btn-back" onclick="go('entry')">←</button>
+  <div class="pad">
+    <h2 class="ask-h">What is on your heart today?</h2>
+    <p class="ask-sub">Write freely, or choose a feeling below.</p>
+    <textarea id="ask-in" class="ask-ta" placeholder="Write what you're carrying…" oninput="onText()" rows="5"></textarea>
+    <div class="or-div"><span>or</span></div>
+    <div class="pills">
+      <button class="pill" data-mood="Tired" onclick="pickMood(this)">Tired</button>
+      <button class="pill" data-mood="Restless" onclick="pickMood(this)">Restless</button>
+      <button class="pill" data-mood="Grateful" onclick="pickMood(this)">Grateful</button>
+      <button class="pill" data-mood="Heavy" onclick="pickMood(this)">Heavy</button>
+      <button class="pill" data-mood="Uncertain" onclick="pickMood(this)">Uncertain</button>
+      <button class="pill" data-mood="Peaceful" onclick="pickMood(this)">Peaceful</button>
+    </div>
+    <button id="btn-rcv" class="btn-receive" onclick="receive()" disabled>Receive</button>
+    <p id="err" class="err"></p>
+  </div>
+</div>
+
+<!-- LOADING -->
+<div id="s-loading" class="screen">
+  <svg class="bloom" viewBox="0 0 64 64" fill="none">
+    <circle cx="32" cy="32" r="26" stroke="#9BA89A" stroke-width="1"/>
+    <circle cx="32" cy="32" r="17" stroke="#4A6741" stroke-width="1"/>
+    <circle cx="32" cy="32" r="8" fill="#EDE5D0"/>
+    <circle cx="32" cy="32" r="4" fill="#4A6741"/>
+    <ellipse cx="32" cy="13" rx="3.5" ry="6" fill="#9BA89A" opacity=".4"/>
+    <ellipse cx="32" cy="51" rx="3.5" ry="6" fill="#9BA89A" opacity=".4"/>
+    <ellipse cx="13" cy="32" rx="6" ry="3.5" fill="#9BA89A" opacity=".4"/>
+    <ellipse cx="51" cy="32" rx="6" ry="3.5" fill="#9BA89A" opacity=".4"/>
+    <ellipse cx="18" cy="18" rx="3.5" ry="6" fill="#9BA89A" opacity=".3" transform="rotate(-45 18 18)"/>
+    <ellipse cx="46" cy="46" rx="3.5" ry="6" fill="#9BA89A" opacity=".3" transform="rotate(-45 46 46)"/>
+    <ellipse cx="46" cy="18" rx="3.5" ry="6" fill="#9BA89A" opacity=".3" transform="rotate(45 46 18)"/>
+    <ellipse cx="18" cy="46" rx="3.5" ry="6" fill="#9BA89A" opacity=".3" transform="rotate(45 18 46)"/>
+  </svg>
+  <p class="load-w" id="load-w">Be still a moment…</p>
+  <div id="load-err-block" style="display:none">
+    <p class="load-err" id="load-err"></p>
+    <button class="btn-back-load" onclick="go('ask')">← Go back</button>
+  </div>
+</div>
+
+<!-- RECEIVE -->
+<div id="s-receive" class="screen">
+  <button class="btn-back" onclick="go('ask')">←</button>
+  <div class="pad">
+    <p id="r-ref" class="v-ref"></p>
+    <p id="r-verse" class="v-text"></p>
+    <div class="r-div"></div>
+    <p id="r-refl" class="refl"></p>
+    <div id="r-pblock" class="j-q" style="display:none"><span id="r-p"></span></div>
+    <div class="r-actions">
+      <button class="btn-journal" onclick="go('journal')">Write in journal</button>
+      <button class="btn-again" onclick="go('ask')">Ask again</button>
+    </div>
+  </div>
+</div>
+
+<!-- JOURNAL -->
+<div id="s-journal" class="screen">
+  <button class="btn-back" onclick="go('receive')">←</button>
+  <div class="pad">
+    <p class="j-date" id="j-date"></p>
+    <div class="j-echo" id="j-echo"></div>
+    <textarea id="j-in" class="j-ta" placeholder="Nothing you write here is seen or judged." oninput="onJType()" rows="9"></textarea>
+    <p class="save-st" id="j-st"></p>
+    <div id="j-past" style="display:none">
+      <p class="past-lbl">Previous reflections</p>
+      <div id="j-list"></div>
+    </div>
+  </div>
+</div>
+
+</div>
+<script>
+let mood = null, last = null, saveTimer = null, watchdog = null;
+
+function go(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById('s-' + id).classList.add('active');
+  document.getElementById('err').textContent = '';
+  clearTimeout(watchdog);
+  if (id === 'loading') {
+    document.getElementById('load-w').style.display = 'block';
+    document.getElementById('load-err-block').style.display = 'none';
+    watchdog = setTimeout(() => showLoadError('The request timed out. Please try again.'), 20000);
+  }
+  if (id === 'journal') initJournal();
+}
+
+function showLoadError(msg) {
+  document.getElementById('load-w').style.display = 'none';
+  document.getElementById('load-err').textContent = msg;
+  document.getElementById('load-err-block').style.display = 'block';
+}
+
+function pickMood(el) {
+  const m = el.dataset.mood;
+  if (mood === m) { mood = null; el.classList.remove('sel'); }
+  else {
+    mood = m;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('sel'));
+    el.classList.add('sel');
+    document.getElementById('ask-in').value = '';
+  }
+  sync();
+}
+
+function onText() {
+  if (document.getElementById('ask-in').value.trim()) {
+    mood = null;
+    document.querySelectorAll('.pill').forEach(p => p.classList.remove('sel'));
+  }
+  sync();
+}
+
+function sync() {
+  const v = document.getElementById('ask-in').value.trim();
+  document.getElementById('btn-rcv').disabled = !v && !mood;
+}
+
+async function receive() {
+  const raw = document.getElementById('ask-in').value.trim();
+  const msg = mood ? `The person feels: ${mood}. Respond to that feeling.` : `The person wrote: "${raw}"`;
+  go('loading');
+  try {
+    const res = await fetch('/receive', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: msg })
+    });
+    clearTimeout(watchdog);
+    if (!res.ok) { const t = await res.text(); throw new Error(res.status + ': ' + t); }
+    const data = await res.json();
+    const text = (data.content.find(b => b.type === 'text') || {}).text || '';
+    const clean = text.replace(/^```json\s*/, '').replace(/\s*```$/, '').trim();
+    last = JSON.parse(clean);
+    document.getElementById('r-ref').textContent = last.verse_ref || '';
+    document.getElementById('r-verse').textContent = '\u201c' + (last.verse_text || '') + '\u201d';
+    document.getElementById('r-refl').textContent = last.reflection || '';
+    if (last.journal_prompt) {
+      document.getElementById('r-p').textContent = last.journal_prompt;
+      document.getElementById('r-pblock').style.display = 'block';
+    } else {
+      document.getElementById('r-pblock').style.display = 'none';
+    }
+    go('receive');
+  } catch(e) {
+    clearTimeout(watchdog);
+    showLoadError(e.message || 'Unknown error');
+  }
+}
+
+function initJournal() {
+  const now = new Date();
+  document.getElementById('j-date').textContent = now.toLocaleDateString('en-GB', { weekday:'long', month:'long', day:'numeric', year:'numeric' });
+  const echo = document.getElementById('j-echo');
+  if (last && last.journal_prompt) { echo.textContent = last.journal_prompt; echo.style.display = 'block'; }
+  else echo.style.display = 'none';
+  const key = 'mg-' + now.toISOString().split('T')[0];
+  try { document.getElementById('j-in').value = localStorage.getItem(key) || ''; } catch(e) {}
+  loadPast(key);
+}
+
+function onJType() {
+  clearTimeout(saveTimer);
+  saveTimer = setTimeout(() => {
+    const key = 'mg-' + new Date().toISOString().split('T')[0];
+    try { localStorage.setItem(key, document.getElementById('j-in').value); } catch(e) {}
+    const s = document.getElementById('j-st');
+    s.style.opacity = '1'; s.textContent = 'Saved quietly.';
+    setTimeout(() => s.style.opacity = '0', 2200);
+  }, 900);
+}
+
+function loadPast(todayKey) {
+  const entries = [];
+  try {
+    for (let i = 0; i < localStorage.length; i++) {
+      const k = localStorage.key(i);
+      if (k && k.startsWith('mg-') && k !== todayKey)
+        entries.push({ k, v: localStorage.getItem(k) });
+    }
+  } catch(e) {}
+  entries.sort((a,b) => b.k.localeCompare(a.k));
+  const past = document.getElementById('j-past');
+  const list = document.getElementById('j-list');
+  if (!entries.length) { past.style.display = 'none'; return; }
+  past.style.display = 'block';
+  list.innerHTML = entries.slice(0,5).map(e => {
+    const d = new Date(e.k.replace('mg-',''));
+    const lbl = d.toLocaleDateString('en-GB', { weekday:'long', month:'long', day:'numeric' });
+    const pre = (e.v||'').substring(0,90) + ((e.v||'').length > 90 ? '…' : '');
+    return `<div class="pe"><p class="pe-d">${lbl}</p><p class="pe-p">${pre||'—'}</p></div>`;
+  }).join('');
+}
+</script>
+</body>
+</html>

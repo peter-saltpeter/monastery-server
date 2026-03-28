@@ -3,6 +3,10 @@ import Anthropic from "@anthropic-ai/sdk";
 
 const app = express();
 app.use(express.json());
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
+const __dirname = dirname(fileURLToPath(import.meta.url));
+app.use(express.static(join(__dirname, "public")));
 
 app.use((req, res, next) => {
   res.header("Access-Control-Allow-Origin", "*");
